@@ -112,6 +112,8 @@ func (p processor) processDashboards() error {
 		if matches, _ := regexp.MatchString(cfg.title, allDashboards[i].Title); !matches {
 			continue
 		}
+		log.Println("processing: ", allDashboards[i].Title)
+
 		if err := p.processDashboardWithUid(allDashboards[i].UID); err != nil {
 			return fmt.Errorf("unable to process dashboard %q: %w", allDashboards[i].Title, err)
 		}
