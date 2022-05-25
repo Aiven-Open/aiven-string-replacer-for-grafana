@@ -15,7 +15,6 @@ import (
 type config struct {
 	url      string
 	apikey   string
-	orgid    int64
 	title    string
 	override bool
 	retries  int
@@ -26,7 +25,6 @@ var cfg config
 func main() {
 	flag.StringVar(&cfg.url, "url", "", "Grafana url (required)")
 	flag.StringVar(&cfg.apikey, "apikey", "", "Grafana api key (required)")
-	flag.Int64Var(&cfg.orgid, "orgid", 0, "Org id (optional)")
 	flag.StringVar(&cfg.title, "title", "", "Title expression to process (required)")
 	flag.BoolVar(&cfg.override, "override", true, "Override dashboard on conflict")
 	flag.IntVar(&cfg.retries, "retries", 3, "Retries when grafana using the grafana api")
