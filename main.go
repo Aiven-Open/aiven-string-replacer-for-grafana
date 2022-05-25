@@ -59,7 +59,7 @@ type processor struct {
 }
 
 var rules = []func(*gapi.Dashboard) error{
-	// replace "elasticsearch_" by "opensearch_"
+	// replace "elasticsearch" by "opensearch"
 	// just do the string replace on the whole model, probably fine (?)
 	// this will also replace alert names, panel names, etc
 	func(d *gapi.Dashboard) error {
