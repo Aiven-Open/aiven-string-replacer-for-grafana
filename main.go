@@ -112,14 +112,14 @@ func (p processor) processDashboards() error {
 		}
 		log.Println("processing: ", allDashboards[i].Title)
 
-		if err := p.processDashboardWithUid(allDashboards[i].UID); err != nil {
+		if err := p.processDashboardWithUID(allDashboards[i].UID); err != nil {
 			return fmt.Errorf("unable to process dashboard %q: %w", allDashboards[i].Title, err)
 		}
 	}
 	return nil
 }
 
-func (p processor) processDashboardWithUid(uid string) error {
+func (p processor) processDashboardWithUID(uid string) error {
 	dashboard, err := p.client.DashboardByUID(uid)
 	if err != nil {
 		return fmt.Errorf("unable to fetch dashboard with uid %q: %w", uid, err)
