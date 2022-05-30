@@ -5,6 +5,8 @@ import (
 	"strings"
 )
 
+const replacementSeperator = "<=>"
+
 type replacements struct {
 	rs []replacement
 }
@@ -14,9 +16,9 @@ func (rl *replacements) String() string {
 }
 
 func (rl *replacements) Set(val string) error {
-	splitted := strings.Split(val, ":")
+	splitted := strings.Split(val, replacementSeperator)
 	if len(splitted) != 2 {
-		return fmt.Errorf("%q should contain exactely one ':'", val)
+		return fmt.Errorf("%q should contain exactely one %q", val, replacementSeperator)
 	}
 	k, v := splitted[0], splitted[1]
 

@@ -30,7 +30,7 @@ func main() {
 	flag.StringVar(&cfg.url, "url", "", "Grafana url (required)")
 	flag.StringVar(&cfg.apikey, "apikey", "", "Grafana api key (required)")
 	flag.StringVar(&cfg.uid, "uid", "", "Dashboard uid to process (required)")
-	flag.Var(&cfg.replace, "replace", "What to replace (key:value, multiple entries allowed, required)")
+	flag.Var(&cfg.replace, "replace", fmt.Sprintf("What to replace (key%svalue, multiple entries allowed, required)", replacementSeperator))
 	flag.BoolVar(&cfg.overwrite, "overwrite", true, "Overwrite dashboard on conflict")
 	flag.IntVar(&cfg.retries, "retries", 3, "Retries when grafana the grafana api")
 
