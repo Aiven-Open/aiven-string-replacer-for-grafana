@@ -7,7 +7,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"strings"
 
 	gapi "github.com/grafana/grafana-api-golang-client"
 )
@@ -16,7 +15,8 @@ type config struct {
 	url       string
 	apikey    string
 	uid       string
-	replace   replacements
+	from      string
+	to        string
 	overwrite bool
 	retries   int
 }
@@ -27,7 +27,8 @@ func main() {
 	flag.StringVar(&cfg.url, "url", "", "Grafana url (required)")
 	flag.StringVar(&cfg.apikey, "apikey", "", "Grafana api key (required)")
 	flag.StringVar(&cfg.uid, "uid", "", "Dashboard uid to process (required)")
-	flag.Var(&cfg.replace, "replace", fmt.Sprintf("What to replace (key%svalue, multiple entries allowed, required)", replacementSeperator))
+	flag.StringVar(&cfg.from, "from", "", "Replace from (required)")
+	flag.StringVar(&cfg.to, "to", "", "Replace to (required)")
 	flag.BoolVar(&cfg.overwrite, "overwrite", true, "Overwrite dashboard on conflict")
 	flag.IntVar(&cfg.retries, "retries", 3, "Retries when grafana the grafana api")
 
@@ -60,10 +61,7 @@ func processDashboard(cfg config) error {
 	if err != nil {
 		return fmt.Errorf("unable to marshal model: %w", err)
 	}
-	for i := range cfg.replace.rs {
-		key, val := cfg.replace.rs[i].key, cfg.replace.rs[i].val
-		dbytes = bytes.ReplaceAll(dbytes, []byte(key), []byte(val))
-	}
+	dbytes = bytes.ReplaceAll(dbytes, []byte(cfg.from), []byte(cfg.to))
 
 	model := make(map[string]interface{})
 	if err := json.Unmarshal(dbytes, &model); err != nil {
@@ -82,25 +80,9 @@ func processDashboard(cfg config) error {
 
 func replacerMessage(cfg config) string {
 	const (
-		prefix = "String replacement by aiven-grafana-string-replacer"
+		prefix = "aiven-grafana-string-replacer"
 	)
-
-	b := new(strings.Builder)
-	b.WriteString(prefix)
-	b.WriteString(": ")
-	for i := range cfg.replace.rs {
-		if i > 0 {
-			b.WriteString(", ")
-		}
-		key, val := cfg.replace.rs[i].key, cfg.replace.rs[i].val
-		b.WriteString(fmt.Sprintf("%s<=>%s", key, val))
-	}
-	return b.String()
-}
-
-type replacement struct {
-	key string
-	val string
+	return fmt.Sprintf("%s: %s<=>%s", prefix, cfg.from, cfg.to)
 }
 
 func checkConfig(cfg config) error {
@@ -113,8 +95,11 @@ func checkConfig(cfg config) error {
 	if cfg.uid == "" {
 		return errors.New("'uid' is required")
 	}
-	if len(cfg.replace.rs) == 0 {
-		return errors.New("'replace' is required")
+	if cfg.from == "" {
+		return errors.New("'from' is required")
+	}
+	if cfg.to == "" {
+		return errors.New("'to' is required")
 	}
 	return nil
 }
