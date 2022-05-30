@@ -66,22 +66,22 @@ func processDashboard(cfg config) error {
 	}
 	dbytes = bytes.ReplaceAll(dbytes, []byte(cfg.from), []byte(cfg.to))
 
-	model := make(map[string]interface{})
-	if err := json.Unmarshal(dbytes, &model); err != nil {
+	replaced := make(map[string]interface{})
+	if err := json.Unmarshal(dbytes, &replaced); err != nil {
 		return fmt.Errorf("unable to marshal processed model: %w", err)
 	}
 	orig := dashboard.Model
-	dashboard.Model = model
-	dashboard.Overwrite = cfg.overwrite
-	dashboard.Message = replacerMessage(cfg)
 
 	if cfg.dry {
-		ops, _ := jsondiff.Compare(orig, dashboard.Model)
+		ops, _ := jsondiff.Compare(orig, replaced)
 		for i := range ops {
 			fmt.Println(ops[i].String())
 		}
 		return nil
 	} else {
+		dashboard.Model = replaced
+		dashboard.Overwrite = cfg.overwrite
+		dashboard.Message = replacerMessage(cfg)
 		if _, err := client.NewDashboard(*dashboard); err != nil {
 			return fmt.Errorf("unable to save dashboard: %w", err)
 		}
