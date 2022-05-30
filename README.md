@@ -16,12 +16,16 @@ go install github.com/aiven/aiven-grafana-string-replacer
 Usage of aiven-grafana-string-replacer:
   -apikey string
     	Grafana api key (required)
+  -dry
+    	Just show diffs without saving
+  -from string
+    	Replace from (required)
   -overwrite
     	Overwrite dashboard on conflict (default true)
-  -replace value
-    	What to replace (key<=>value, multiple entries allowed, required)
   -retries int
-    	Retries when using the grafana api (default 3)
+    	Retries when grafana the grafana api (default 3)
+  -to string
+    	Replace to (required)
   -uid string
     	Dashboard uid to process (required)
   -url string
@@ -32,5 +36,5 @@ Usage of aiven-grafana-string-replacer:
 For example, if you wish to rename metrics that start with `elasticsearch_` to metrics that start with `opensearch_`:
 
 ```bash
-aiven-grafana-string-replacer -apikey [...] -url https://my-grafana.org/ -replace "elasticsearch_<=>opensearch_" -uid [...]
+aiven-grafana-string-replacer -apikey [...] -url https://my-grafana.org/ -from elasticsearch_ -to opensearch_ -uid [...]
 ```

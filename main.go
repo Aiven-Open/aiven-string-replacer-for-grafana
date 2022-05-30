@@ -9,6 +9,7 @@ import (
 	"log"
 
 	gapi "github.com/grafana/grafana-api-golang-client"
+	"github.com/wI2L/jsondiff"
 )
 
 type config struct {
@@ -19,6 +20,7 @@ type config struct {
 	to        string
 	overwrite bool
 	retries   int
+	dry       bool
 }
 
 var cfg config
@@ -30,6 +32,7 @@ func main() {
 	flag.StringVar(&cfg.from, "from", "", "Replace from (required)")
 	flag.StringVar(&cfg.to, "to", "", "Replace to (required)")
 	flag.BoolVar(&cfg.overwrite, "overwrite", true, "Overwrite dashboard on conflict")
+	flag.BoolVar(&cfg.dry, "dry", false, "Just show diffs without saving")
 	flag.IntVar(&cfg.retries, "retries", 3, "Retries when grafana the grafana api")
 
 	flag.Parse()
@@ -67,12 +70,21 @@ func processDashboard(cfg config) error {
 	if err := json.Unmarshal(dbytes, &model); err != nil {
 		return fmt.Errorf("unable to marshal processed model: %w", err)
 	}
+	orig := dashboard.Model
 	dashboard.Model = model
 	dashboard.Overwrite = cfg.overwrite
 	dashboard.Message = replacerMessage(cfg)
 
-	if _, err := client.NewDashboard(*dashboard); err != nil {
-		return fmt.Errorf("unable to save dashboard: %w", err)
+	if cfg.dry {
+		ops, _ := jsondiff.Compare(orig, dashboard.Model)
+		for i := range ops {
+			fmt.Println(ops[i].String())
+		}
+		return nil
+	} else {
+		if _, err := client.NewDashboard(*dashboard); err != nil {
+			return fmt.Errorf("unable to save dashboard: %w", err)
+		}
 	}
 
 	return nil
