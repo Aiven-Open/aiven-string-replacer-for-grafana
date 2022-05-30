@@ -11,11 +11,15 @@ import (
 	gapi "github.com/grafana/grafana-api-golang-client"
 )
 
+const (
+	replacerMessage = "String replacement by aiven-grafana-string-replacer"
+)
+
 type config struct {
 	url       string
 	apikey    string
 	uid       string
-	replace   replacers
+	replace   replacements
 	overwrite bool
 	retries   int
 }
@@ -28,7 +32,7 @@ func main() {
 	flag.StringVar(&cfg.uid, "uid", "", "Dashboard uid to process (required)")
 	flag.Var(&cfg.replace, "replace", "What to replace (key:value, multiple entries allowed, required)")
 	flag.BoolVar(&cfg.overwrite, "overwrite", true, "Overwrite dashboard on conflict")
-	flag.IntVar(&cfg.retries, "retries", 3, "Retries when grafana using the grafana api")
+	flag.IntVar(&cfg.retries, "retries", 3, "Retries when grafana the grafana api")
 
 	flag.Parse()
 
@@ -70,6 +74,7 @@ func processDashboard(cfg config) error {
 	}
 	dashboard.Model = model
 	dashboard.Overwrite = cfg.overwrite
+	dashboard.Message = replacerMessage
 
 	if _, err := client.NewDashboard(*dashboard); err != nil {
 		return fmt.Errorf("unable to save dashboard: %w", err)
@@ -78,7 +83,7 @@ func processDashboard(cfg config) error {
 	return nil
 }
 
-type replacer struct {
+type replacement struct {
 	key string
 	val string
 }

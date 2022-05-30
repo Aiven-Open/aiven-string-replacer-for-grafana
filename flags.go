@@ -5,22 +5,22 @@ import (
 	"strings"
 )
 
-type replacers struct {
-	rs []replacer
+type replacements struct {
+	rs []replacement
 }
 
-func (rl *replacers) String() string {
+func (rl *replacements) String() string {
 	return ""
 }
 
-func (rl *replacers) Set(val string) error {
+func (rl *replacements) Set(val string) error {
 	splitted := strings.Split(val, ":")
 	if len(splitted) != 2 {
 		return fmt.Errorf("%q should contain exactely one ':'", val)
 	}
 	k, v := splitted[0], splitted[1]
 
-	rl.rs = append(rl.rs, replacer{key: k, val: v})
+	rl.rs = append(rl.rs, replacement{key: k, val: v})
 
 	return nil
 }

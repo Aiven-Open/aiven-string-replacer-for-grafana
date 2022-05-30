@@ -1,4 +1,4 @@
-module github.com/aiven/grafana-converter
+module github.com/aiven/aiven-grafana-string-replacer
 
 go 1.17
 
