@@ -16,6 +16,8 @@ type config struct {
 	url      string
 	apikey   string
 	title    string
+	replace  string
+	by       string
 	override bool
 	retries  int
 }
@@ -26,6 +28,8 @@ func main() {
 	flag.StringVar(&cfg.url, "url", "", "Grafana url (required)")
 	flag.StringVar(&cfg.apikey, "apikey", "", "Grafana api key (required)")
 	flag.StringVar(&cfg.title, "title", "", "Title expression to process (required)")
+	flag.StringVar(&cfg.replace, "replace", "", "String to replace (required)")
+	flag.StringVar(&cfg.by, "by", "", "String to replace by (required)")
 	flag.BoolVar(&cfg.override, "override", true, "Override dashboard on conflict")
 	flag.IntVar(&cfg.retries, "retries", 3, "Retries when grafana using the grafana api")
 
@@ -52,39 +56,24 @@ func processDashboards(cfg config) error {
 type processor struct {
 	cfg    config
 	client *gapi.Client
-
-	rules []func(*gapi.Dashboard) error
-}
-
-var rules = []func(*gapi.Dashboard) error{
-	// replace "elasticsearch" by "opensearch"
-	// just do the string replace on the whole model, probably fine (?)
-	// this will also replace alert names, panel names, etc
-	func(d *gapi.Dashboard) error {
-		dbytes, err := json.Marshal(d.Model)
-		if err != nil {
-			return fmt.Errorf("unable to marshal model: %w", err)
-		}
-
-		dbytes = bytes.ReplaceAll(dbytes, []byte("elasticsearch"), []byte("opensearch"))
-		dbytes = bytes.ReplaceAll(dbytes, []byte("Elasticsearch"), []byte("Opensearch"))
-
-		model := make(map[string]interface{})
-		if err := json.Unmarshal(dbytes, &model); err != nil {
-			return fmt.Errorf("unable to marshal processed model: %w", err)
-		}
-		d.Model = model
-
-		return nil
-	},
 }
 
 func newProcessor(cfg config) (processor, error) {
+	p := processor{}
 	if cfg.url == "" {
-		return processor{}, errors.New("'url' is required")
+		return p, errors.New("'url' is required")
 	}
 	if cfg.apikey == "" {
-		return processor{}, errors.New("'apikey' is required")
+		return p, errors.New("'apikey' is required")
+	}
+	if cfg.title == "" {
+		return p, errors.New("'title' is required")
+	}
+	if cfg.replace == "" {
+		return p, errors.New("'replace' is required")
+	}
+	if cfg.by == "" {
+		return processor{}, errors.New("'by' is required")
 	}
 	if _, err := regexp.Compile(cfg.title); err != nil {
 		return processor{}, fmt.Errorf("'title' is a bad regex: %w", err)
@@ -97,7 +86,7 @@ func newProcessor(cfg config) (processor, error) {
 		return processor{}, fmt.Errorf("unable to create grafana client: %w", err)
 	}
 
-	return processor{cfg: cfg, client: client, rules: rules}, nil
+	return processor{cfg: cfg, client: client}, nil
 }
 
 func (p processor) processDashboards() error {
@@ -124,11 +113,17 @@ func (p processor) processDashboardWithUID(uid string) error {
 	if err != nil {
 		return fmt.Errorf("unable to fetch dashboard with uid %q: %w", uid, err)
 	}
-	for i := range p.rules {
-		if err := p.rules[i](dashboard); err != nil {
-			return fmt.Errorf("unable to modify dashboard with uid %q: %w", uid, err)
-		}
+	dbytes, err := json.Marshal(dashboard.Model)
+	if err != nil {
+		return fmt.Errorf("unable to marshal model: %w", err)
 	}
+	dbytes = bytes.ReplaceAll(dbytes, []byte(cfg.replace), []byte(cfg.by))
+
+	model := make(map[string]interface{})
+	if err := json.Unmarshal(dbytes, &model); err != nil {
+		return fmt.Errorf("unable to marshal processed model: %w", err)
+	}
+	dashboard.Model = model
 
 	if _, err := p.client.SaveDashboard(dashboard.Model, p.cfg.override); err != nil {
 		return fmt.Errorf("unable to save dashboard with uid %q: %w", uid, err)
