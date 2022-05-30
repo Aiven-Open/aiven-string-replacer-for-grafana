@@ -7,12 +7,9 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"strings"
 
 	gapi "github.com/grafana/grafana-api-golang-client"
-)
-
-const (
-	replacerMessage = "String replacement by aiven-grafana-string-replacer"
 )
 
 type config struct {
@@ -74,13 +71,31 @@ func processDashboard(cfg config) error {
 	}
 	dashboard.Model = model
 	dashboard.Overwrite = cfg.overwrite
-	dashboard.Message = replacerMessage
+	dashboard.Message = replacerMessage(cfg)
 
 	if _, err := client.NewDashboard(*dashboard); err != nil {
 		return fmt.Errorf("unable to save dashboard: %w", err)
 	}
 
 	return nil
+}
+
+func replacerMessage(cfg config) string {
+	const (
+		prefix = "String replacement by aiven-grafana-string-replacer"
+	)
+
+	b := new(strings.Builder)
+	b.WriteString(prefix)
+	b.WriteString(": ")
+	for i := range cfg.replace.rs {
+		if i > 0 {
+			b.WriteString(", ")
+		}
+		key, val := cfg.replace.rs[i].key, cfg.replace.rs[i].val
+		b.WriteString(fmt.Sprintf("%s<=>%s", key, val))
+	}
+	return b.String()
 }
 
 type replacement struct {
