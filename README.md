@@ -46,3 +46,7 @@ Please note that the project explicitly does not require a CLA (Contributor Lice
 
 ## Contact
 Bug reports and patches are very welcome, please post them as GitHub issues and pull requests at https://github.com/aiven/aiven-string-replacer-for-grafana . To report any possible vulnerabilities or other serious issues please see our security policy.
+
+## Disclaimer
+
+Grafana® is trademark and property of its respective owner. All product and service names used in this website are for identification purposes only and do not imply endorsement.
