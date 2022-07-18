@@ -92,7 +92,7 @@ func processDashboard(cfg config) error {
 
 func replacerMessage(cfg config) string {
 	const (
-		prefix = "aiven-grafana-string-replacer"
+		prefix = "aiven-string-replacer-for-grafana"
 	)
 	return fmt.Sprintf("%s: %s<=>%s", prefix, cfg.from, cfg.to)
 }

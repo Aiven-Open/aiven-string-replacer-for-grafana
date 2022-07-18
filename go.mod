@@ -1,4 +1,4 @@
-module github.com/aiven/aiven-grafana-string-replacer
+module github.com/aiven/aiven-string-replacer-for-grafana
 
 go 1.17
 
