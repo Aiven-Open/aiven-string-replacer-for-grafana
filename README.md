@@ -38,3 +38,11 @@ For example, if you wish to rename metrics that start with `elasticsearch_` to m
 ```bash
 aiven-grafana-string-replacer -apikey [...] -url https://my-grafana.org/ -from elasticsearch_ -to opensearch_ -uid [...]
 ```
+
+## License
+`aiven-grafana-string-replacer` is licensed under the Apache license, version 2.0. Full license text is available in the LICENSE file.
+
+Please note that the project explicitly does not require a CLA (Contributor License Agreement) from its contributors.
+
+## Contact
+Bug reports and patches are very welcome, please post them as GitHub issues and pull requests at https://github.com/aiven/aiven-grafana-string-replacer . To report any possible vulnerabilities or other serious issues please see our security policy.
