@@ -49,4 +49,4 @@ Bug reports and patches are very welcome, please post them as GitHub issues and 
 
 ## Disclaimer
 
-Grafana® is trademark and property of its respective owner. All product and service names used in this website are for identification purposes only and do not imply endorsement.
+Grafana, Elasticsearch and OpenSearch are trademarks and property of their respective owners. All product and service names used in this website are for identification purposes only and do not imply endorsement.
